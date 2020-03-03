@@ -1,14 +1,18 @@
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as env from 'dotenv';
+import * as admin from 'firebase-admin';
 
 export class AbstractServer {
+    static db;
+
     static init(callback:Function) {
         let app = express();
         app.use(bodyParser.json());
         AbstractServer.initCors(app);
         env.config();
         const port = process.env.PORT || 1112;
+        this.initDbConnection();
         app.listen(port, (err) => {
             if(err) {
                 console.log(err)
@@ -17,6 +21,15 @@ export class AbstractServer {
                 callback(app);
             }
         });
+    }
+
+    private static initDbConnection():void {
+        admin.initializeApp({
+            credential: admin.credential.applicationDefault(),
+            databaseURL: 'https://gaf-mgmt.firebaseio.com/'
+          });
+
+        AbstractServer.db = admin.database();
     }
 
     private static initCors(app:express.Application) {

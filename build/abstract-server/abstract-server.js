@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
 const bodyParser = require("body-parser");
 const env = require("dotenv");
+const admin = require("firebase-admin");
 class AbstractServer {
     static init(callback) {
         let app = express();
@@ -10,6 +11,7 @@ class AbstractServer {
         AbstractServer.initCors(app);
         env.config();
         const port = process.env.PORT || 1112;
+        this.initDbConnection();
         app.listen(port, (err) => {
             if (err) {
                 console.log(err);
@@ -19,6 +21,13 @@ class AbstractServer {
                 callback(app);
             }
         });
+    }
+    static initDbConnection() {
+        admin.initializeApp({
+            credential: admin.credential.applicationDefault(),
+            databaseURL: 'https://gaf-mgmt.firebaseio.com/'
+        });
+        AbstractServer.db = admin.database();
     }
     static initCors(app) {
         app.use((req, res, next) => {
