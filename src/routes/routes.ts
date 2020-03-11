@@ -11,7 +11,7 @@ export class Routes {
     }
 
     private static defaultApi(req:Request, res:Response) {
-        res.status(200).send('Gag Mgmt Server Is Up Running');
+        res.status(200).send('Gaf Mgmt Server Is Running');
     }
 
     private static getAllUsers(req:Request, res:Response): void {

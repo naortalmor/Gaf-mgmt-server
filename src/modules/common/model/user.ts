@@ -1,6 +1,7 @@
 export class User {
     id:string;
+    email:string;
     name:string;
-    team:string;
-    type:string;
+    teamId:number;
+    typeId:number;
 }
