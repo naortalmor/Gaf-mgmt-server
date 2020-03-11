@@ -3,10 +3,11 @@
       "target": "es6",
       "module": "commonjs",
       "outDir": "build",
-      "sourceMap": true
+      "sourceMap": true,
+      "resolveJsonModule": true
     },
     "include": [
-      "src/**/*.ts"
+      "src/**/*"
     ],
     "exclude": [
       "node_modules"
