@@ -18,7 +18,6 @@ export class Routes {
         try {
             let usersRef = AbstractServer.db.ref('users');
             usersRef.on('value', (users) => {
-                console.log(users.val());
                 res.status(200).send(users.val())
             })
         } catch (error) {

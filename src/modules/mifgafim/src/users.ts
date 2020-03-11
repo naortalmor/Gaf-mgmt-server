@@ -1,3 +1,10 @@
+import { AbstractServer } from "../../../abstract-server/abstract-server";
+
 export function getAllUsers() {
-    return [{name: 'shnash', age: 1}, {name: 'lior', age: 2}, {name: 'sinai', age: 69}];
-}
+    let a;
+            let usersRef = AbstractServer.db.ref('users');
+            usersRef.on('value', async (users) => {
+                a = await users.val();
+            })
+            return a;
+        }

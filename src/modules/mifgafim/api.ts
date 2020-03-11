@@ -2,8 +2,8 @@ import * as express from 'express';
 import {Request, Response} from "express";
 import { getHistory } from './src/history';
 import { thisWeekPersons } from './src/this-week-persons';
-import { getAllUsers } from './src/users';
 import { generateNextMifgafs } from './src/justice';
+import { AbstractServer } from '../../abstract-server/abstract-server';
 
 export class MifgafimApi {
     static init(app:express.Application):void {
@@ -14,7 +14,10 @@ export class MifgafimApi {
             res.send(thisWeekPersons());
         });
         app.get('/mifgafim/getAllUsers', (req:Request, res:Response) => {
-            res.send(getAllUsers());
+            let usersRef = AbstractServer.db.ref('users');
+            usersRef.on('value', (users) => {
+                res.status(200).send(users.val())
+            })
         });
         app.get('/mifgafim/generateNextMifgafs/:howMuch', (req:Request, res:Response) => {
             let howMuch:number = parseInt(req.params.howMuch);
