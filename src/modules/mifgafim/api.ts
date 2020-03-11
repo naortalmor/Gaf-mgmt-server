@@ -18,7 +18,7 @@ export class MifgafimApi {
         });
         app.get('/mifgafim/generateNextMifgafs/:howMuch', (req:Request, res:Response) => {
             let howMuch:number = parseInt(req.params.howMuch);
-            if (!isNaN) {
+            if (!isNaN(howMuch)) {
                 res.send(generateNextMifgafs(howMuch));
             } else {
                 res.status(500).send();
