@@ -1,3 +1,4 @@
+import { LaunchesApi } from './../modules/launches/api';
 import * as express from 'express';
 import {Request, Response} from "express";
 import { AbstractServer } from '../abstract-server/abstract-server';
@@ -8,6 +9,7 @@ export class Routes {
         app.get('/', Routes.defaultApi);
         app.get('/allUsers', Routes.getAllUsers);
         MifgafimApi.init(app);
+        LaunchesApi.init(app);
     }
 
     private static defaultApi(req:Request, res:Response) {
@@ -18,7 +20,6 @@ export class Routes {
         try {
             let usersRef = AbstractServer.db.ref('users');
             usersRef.on('value', (users) => {
-                console.log(users.val());
                 res.status(200).send(users.val())
             })
         } catch (error) {
