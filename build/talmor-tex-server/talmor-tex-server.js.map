@@ -1,1 +1,0 @@
-{"version":3,"file":"talmor-tex-server.js","sourceRoot":"","sources":["../../src/talmor-tex-server/talmor-tex-server.ts"],"names":[],"mappings":";;AAAA,wEAAkE;AAElE,6CAAwC;AAExC,MAAa,eAAe;IACxB,MAAM,CAAC,GAAG;QACN,gCAAc,CAAC,IAAI,CAAC,eAAe,CAAC,OAAO,CAAC,CAAA;IAChD,CAAC;IAED,MAAM,CAAC,OAAO,CAAC,GAAuB;QAClC,eAAM,CAAC,IAAI,CAAC,GAAG,CAAC,CAAC;IACrB,CAAC;CACJ;AARD,0CAQC"}
