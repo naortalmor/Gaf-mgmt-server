@@ -1,11 +1,13 @@
 import * as express from 'express';
 import {Request, Response} from "express";
 import { AbstractServer } from '../abstract-server/abstract-server';
+import { MifgafimModule } from '../modules/mifgafim/main';
 
 export class Routes {
     static async init(app:express.Application) {
         app.get('/', Routes.defaultApi);
         app.get('/allUsers', Routes.getAllUsers);
+        MifgafimModule.init(app);
     }
 
     private static defaultApi(req:Request, res:Response) {
