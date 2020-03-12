@@ -19,10 +19,20 @@ export class MifgafimApi {
                 res.status(200).send(users.val())
             })
         });
-        app.get('/mifgafim/generateNextMifgafs/:howMuch', (req:Request, res:Response) => {
+        app.get('/mifgafim/winners', (req:Request, res:Response) => {
+            let usersRef = AbstractServer.db.ref('winners');
+            usersRef.on('value', (winners) => {
+                res.send((winners.val()));
+            })
+            
+        })
+        app.get('/mifgafim/generateNextMifgafs/:howMuch', async (req:Request, res:Response) => {
             let howMuch:number = parseInt(req.params.howMuch);
             if (!isNaN(howMuch)) {
-                res.send(generateNextMifgafs(howMuch));
+                let usersRef = AbstractServer.db.ref('winners');
+                let insert = await generateNextMifgafs(howMuch);
+                usersRef.set(insert);
+                res.send(insert);
             } else {
                 res.status(500).send();
             }

@@ -1,5 +1,6 @@
 import { MifgafUser } from "../model/mifgaf-user";
 import { HistoryRecord } from "../model/history-record";
+import { AbstractServer } from "../../../abstract-server/abstract-server";
 
 export function getHistory(): HistoryRecord[] {
     return [
@@ -22,64 +23,11 @@ export function getHistory(): HistoryRecord[] {
     ];
 }
 
-export function getUsers(): MifgafUser[] {
-    // active users only
-    return [
-        {
-            id: '1',
-            email: '1',
-            name: 'lior',
-            teamId: 1,
-            typeId: 1,
-            startingRound: 0
-        },
-        {
-            id: '2',
-            email: '2',
-            name: 'tamir',
-            teamId: 1,
-            typeId: 0,
-            startingRound: 0
-        },
-        {
-            id: '3',
-            email: '1',
-            name: 'naor',
-            teamId: 1,
-            typeId: 1,
-            startingRound: 0
-        },
-        {
-            id: '4',
-            email: '2',
-            name: 'saeed',
-            teamId: 1,
-            typeId: 1,
-            startingRound: 0
-        },
-        {
-            id: '5',
-            email: '1',
-            name: 'ran',
-            teamId: 1,
-            typeId: 1,
-            startingRound: 0
-        },
-        {
-            id: '6',
-            email: '2',
-            name: 'aya',
-            teamId: 1,
-            typeId: 0,
-            startingRound: 0
-        },
-        {
-            id: '7',
-            email: '2',
-            name: 'raz',
-            teamId: 1,
-            typeId: 1,
-            startingRound: 0
-        }
-    ];
+export function getUsers():Promise<MifgafUser[]> {
+return new Promise(function (resolve,reject) {
+    let usersRef = AbstractServer.db.ref('users');
+            usersRef.on('value', (users) => {
+                resolve(Object.values(users.val()));
+            });
+})
 }
