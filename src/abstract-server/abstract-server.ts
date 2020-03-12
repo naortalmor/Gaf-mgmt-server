@@ -4,7 +4,7 @@ import * as env from 'dotenv';
 import * as admin from 'firebase-admin';
 
 export class AbstractServer {
-    static db;
+    public static db;
 
     static init(callback: Function) {
         let app = express();

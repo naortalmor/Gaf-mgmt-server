@@ -1,3 +1,4 @@
+import { EveningsApi } from './../modules/evenings/api';
 import { LaunchesApi } from './../modules/launches/api';
 import * as express from 'express';
 import {Request, Response} from "express";
@@ -10,6 +11,7 @@ export class Routes {
         app.get('/allUsers', Routes.getAllUsers);
         MifgafimApi.init(app);
         LaunchesApi.init(app);
+        EveningsApi.init(app);
     }
 
     private static defaultApi(req:Request, res:Response) {

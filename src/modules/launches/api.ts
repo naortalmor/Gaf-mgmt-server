@@ -2,7 +2,6 @@ import * as express from 'express';
 import { Request, Response } from 'express';
 import { AbstractServer } from '../../abstract-server/abstract-server';
 
-
 export class LaunchesApi {
     static init(app:express.Application):void {
         app.get('/launches/getRestaurants', (req:Request, res:Response) => {

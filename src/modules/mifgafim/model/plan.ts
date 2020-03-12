@@ -1,4 +1,3 @@
-export interface Plan {
-    bringers:string[];
-    howFarInTheFuture?:number;
-}
+import { MifgafUser } from "./mifgaf-user";
+
+export type Plan = MifgafUser[];
