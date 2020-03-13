@@ -35,7 +35,10 @@ export class EveningsApi {
                 eventsRef.set(newCalenderEvent).then(() => {
                     res.send(newCalenderEvent)
                 }
-                );
+                ).catch((error) => {
+                    console.log(`Error with saving new restaurant - ${error}`);
+                    res.status(500).send(`Error with saving new restaurant - ${error}`)
+                })
             } catch (error) {
                 console.log(`Error with saving new restaurant - ${error}`);
                 res.status(500).send(`Error with saving new restaurant - ${error}`)
