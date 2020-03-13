@@ -84,5 +84,17 @@ export class LaunchesApi {
                 res.status(500).send(`Error with getting all restaurants - ${error}`);
             }
         });
+
+        app.get('/launches/getDiningRoomOfToday', (req:Request, res:Response) => {
+            try {
+                let diningRoomRef = AbstractServer.db.ref('restaurant-survey/dining-room');
+                diningRoomRef.on('value', (diningRoom) => {-
+                    res.status(200).send(diningRoom);
+                });
+            } catch (error) {
+                console.log(`Error with getting dining room of today - ${error}`);
+                res.status(500).send(`Error with getting dining room of today - ${error}`);
+            }
+        });
     }
 }
