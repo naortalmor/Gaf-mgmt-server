@@ -72,10 +72,12 @@ export class LaunchesApi {
 
                         } else {
                             // insert new val
-                            restaurantSurveySet.set({restaurantId:[newVote.voterId]});
+                            restaurantSurveySet.set({restaurantId: [newVote.voterId]});
                         }
                     });
                 });
+
+                res.status(200).send(req.body);
             } catch (error) {
                 res.status(500).send(`Error with saving new restaurant - ${error}`);
             }
