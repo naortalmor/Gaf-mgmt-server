@@ -11,7 +11,6 @@ export class LaunchesApi {
                     res.status(200).send(Object.values(restaurants.val()).filter(curr => curr));
                 });
             } catch (error) {
-                console.log(`Error with getting all restaurants - ${error}`);
                 res.status(500).send(`Error with getting all restaurants - ${error}`);
             }
         });
@@ -23,7 +22,6 @@ export class LaunchesApi {
                 restaurantRef.set(newRestaurant);
                 res.send(newRestaurant);
             } catch (error) {
-                console.log(`Error with saving new restaurant - ${error}`);
                 res.status(500).send(`Error with saving new restaurant - ${error}`);
             }
         });
@@ -31,12 +29,12 @@ export class LaunchesApi {
         app.post('/launches/updateRestaurantSurveyStatus', (req:Request, res:Response) => {
             try {
                 let statusesRef = AbstractServer.db.ref('statuses');
-                const newStatus = req.body.newStatus;
+                const newStatus:boolean = req.body.newStatus;
 
-                statusesRef.update({restaurantSurveyStatus: newStatus}).then(result => res.send(newStatus)).catch(error => res.status(500).send(`Error with saving new restaurant - ${error}`));
+                statusesRef.update({restaurantSurveyStatus: newStatus}).then(result => res.send(newStatus))
+                    .catch(error => res.status(500).send(`Error with saving new restaurant survey status - ${error}`));
             } catch (error) {
-                console.log(`Error with update restaurant survey- ${error}`);
-                res.status(500).send(`Error with saving new restaurant - ${error}`);
+                res.status(500).send(`Error with saving new restaurant survey status - ${error}`);
             }
         });
 
@@ -44,31 +42,41 @@ export class LaunchesApi {
             try {
                 let statusesRef = AbstractServer.db.ref('statuses');
                 statusesRef.on('value', (status) => {
-                    res.status(200).send(Object.values(status.val()).filter(curr => curr));
+                    const statuses:boolean[] = Object.values(status.val());
+                    res.status(200).send(statuses ? statuses[0] : false);
                 });
             } catch (error) {
-                console.log(`Error with getting restaurant survey - ${error}`);
                 res.status(500).send(`Error with getting all restaurants - ${error}`);
             }
         });
 
         app.post('/launches/updateRestaurantSurvey', (req:Request, res:Response) => {
             try {
-                let restaurantSurveyRef = AbstractServer.db.ref('restaurant-survey');
-                const newVote:{ id:number, voterId:string } = req.body;
+                let restaurantSurveyGet = AbstractServer.db.ref('restaurant-survey');
+                let restaurantSurveySet = AbstractServer.db.ref('restaurant-survey').push();
 
-                restaurantSurveyRef.on('value', (restaurantSurvey) => {
-                    let ans = restaurantSurvey.find(res => res.id === newVote.id);
-                    if (ans) {
-                        ans.voterId.push(newVote.voterId);
-                    } else {
-                        ans = newVote;
-                    }
-                    let surveyRef = AbstractServer.db.ref('restaurant-survey').push();
-                    surveyRef.set(ans).then(result => res.send(result)).catch(error => res.status(500).send(`Error with saving new restaurant - ${error}`));
+                restaurantSurveyGet.on('value', (survey) => {
+                    const newVote:{ ids:number[], voterId:string } = req.body;
+                    const surveyDbValue = survey.val();
+                    const dbRestaurant:string[] = Object.keys(surveyDbValue);
+
+                    console.log(Object.values(surveyDbValue));
+                    console.log(Object.keys(surveyDbValue));
+
+                    newVote.ids.forEach((restaurantId:number) => {
+                        if (dbRestaurant.find(res => res === restaurantId.toString())) {
+                            //update existed val
+                            const DbVoters:string[] = surveyDbValue[surveyDbValue];
+                            const newVoters:string[] = [...DbVoters, newVote.voterId];
+                            restaurantSurveyGet.update({restaurantId: newVoters});
+
+                        } else {
+                            // insert new val
+                            restaurantSurveySet.set({restaurantId:[newVote.voterId]});
+                        }
+                    });
                 });
             } catch (error) {
-                console.log(`Error with updating restaurant survey - ${error}`);
                 res.status(500).send(`Error with saving new restaurant - ${error}`);
             }
         });
@@ -80,7 +88,6 @@ export class LaunchesApi {
                     res.status(200).send(Object.values(restaurantSurvey.val()).filter(curr => curr));
                 });
             } catch (error) {
-                console.log(`Error with getting restaurant survey - ${error}`);
                 res.status(500).send(`Error with getting all restaurants - ${error}`);
             }
         });
@@ -88,11 +95,11 @@ export class LaunchesApi {
         app.get('/launches/getDiningRoomOfToday', (req:Request, res:Response) => {
             try {
                 let diningRoomRef = AbstractServer.db.ref('restaurant-survey/dining-room');
-                diningRoomRef.on('value', (diningRoom) => {-
-                    res.status(200).send(diningRoom);
+                diningRoomRef.on('value', (diningRoom) => {
+                    -
+                        res.status(200).send(diningRoom);
                 });
             } catch (error) {
-                console.log(`Error with getting dining room of today - ${error}`);
                 res.status(500).send(`Error with getting dining room of today - ${error}`);
             }
         });
