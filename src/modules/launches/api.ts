@@ -79,7 +79,7 @@ export class LaunchesApi {
                     res.status(200).send(restaurantSurvey.val());
                 });
             } catch (error) {
-                res.status(500).send(`Error with getting all restaurants - ${error}`);
+                res.status(500).send(`Error with getting restaurants survey- ${error}`);
             }
         });
 
