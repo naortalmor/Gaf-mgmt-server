@@ -41,7 +41,7 @@ export class LaunchesApi {
         app.get('/launches/getRestaurantSurveyStatus', (req:Request, res:Response) => {
             try {
                 let statusesRef = AbstractServer.db.ref('statuses');
-                statusesRef.on('value', (status) => {
+                statusesRef.once('value').then(status => {
                     const statuses:boolean[] = Object.values(status.val());
                     res.status(200).send(statuses ? statuses[0] : false);
                 });
@@ -53,18 +53,15 @@ export class LaunchesApi {
         app.post('/launches/updateRestaurantSurvey', (req:Request, res:Response) => {
             try {
                 let restaurantSurvey = AbstractServer.db.ref('restaurant-survey');
-
                 restaurantSurvey.once('value').then(dbSurvey => {
                     const newVote:NewVote = req.body;
-                    const dbSurveyValues:Object = dbSurvey.val();
-                    let updates:Object = {};
+                    const dbSurveyValues:RestaurantSurvey = dbSurvey.val();
+                    let updates:RestaurantSurvey = {};
                     newVote.ids.forEach((restaurantId:number) => {
                         updates[restaurantId] = this.getNewVote(restaurantId.toString(), newVote.voterId, dbSurveyValues);
                     });
 
-                    restaurantSurvey.update(updates)
-                        .then(result => res.status(200).send(updates));
-
+                    restaurantSurvey.update(updates).then(result => res.status(200).send(updates));
                 });
             } catch (error) {
                 console.log(error);
@@ -75,7 +72,7 @@ export class LaunchesApi {
         app.get('/launches/getRestaurantSurvey', (req:Request, res:Response) => {
             try {
                 let restaurantSurveyRef = AbstractServer.db.ref('restaurant-survey');
-                restaurantSurveyRef.on('value', (restaurantSurvey) => {
+                restaurantSurveyRef.once('value').then(restaurantSurvey => {
                     res.status(200).send(restaurantSurvey.val());
                 });
             } catch (error) {
@@ -96,7 +93,7 @@ export class LaunchesApi {
         });
     }
 
-    private static getNewVote(restaurantId:string, voterId:string, dbSurveyValues:Object):string[] {
+    private static getNewVote(restaurantId:string, voterId:string, dbSurveyValues:RestaurantSurvey):string[] {
         let newVoters:string[] = [voterId];
         if (dbSurveyValues[restaurantId]) {
             const DbVoters:string[] = dbSurveyValues[restaurantId];
@@ -114,4 +111,8 @@ export class LaunchesApi {
 interface NewVote {
     ids:number[];
     voterId:string;
+}
+
+export interface RestaurantSurvey {
+    [id:string]:string[];
 }
