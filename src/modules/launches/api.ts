@@ -55,7 +55,7 @@ export class LaunchesApi {
                 let restaurantSurvey = AbstractServer.db.ref('restaurant-survey');
 
                 restaurantSurvey.once('value').then(dbSurvey => {
-                    const newVote:{ ids:number[], voterId:string } = req.body;
+                    const newVote:NewVote = req.body;
                     const dbSurveyValues:Object = dbSurvey.val();
                     let updates:Object = {};
                     newVote.ids.forEach((restaurantId:number) => {
@@ -109,4 +109,9 @@ export class LaunchesApi {
 
         return newVoters;
     }
+}
+
+interface NewVote {
+    ids:number[];
+    voterId:string;
 }
