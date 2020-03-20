@@ -113,6 +113,6 @@ interface NewVote {
     voterId:string;
 }
 
-export interface RestaurantSurvey {
+interface RestaurantSurvey {
     [id:string]:string[];
 }
