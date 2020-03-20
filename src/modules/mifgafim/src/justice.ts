@@ -5,7 +5,6 @@ import { Plan } from "../model/plan";
 
 async function getHighscores(): Promise<MifgafUser[]> {
         let users:MifgafUser[] = (await getUsers());
-    console.log(users);
     let usersDictionary: { [id: string]: MifgafUser } = {};
     users.forEach((user) => {
             usersDictionary[user.id] = user;

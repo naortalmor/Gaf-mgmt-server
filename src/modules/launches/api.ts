@@ -11,7 +11,6 @@ export class LaunchesApi {
                     res.status(200).send(Object.values(restaurants.val()).filter(curr => curr));
                 });
             } catch (error) {
-                console.log(`Error with getting all restaurants - ${error}`);
                 res.status(500).send(`Error with getting all restaurants - ${error}`);
             }
         });
@@ -23,7 +22,6 @@ export class LaunchesApi {
                 restaurantRef.set(newRestaurant);
                 res.send(newRestaurant);
             } catch (error) {
-                console.log(`Error with saving new restaurant - ${error}`);
                 res.status(500).send(`Error with saving new restaurant - ${error}`);
             }
         });
@@ -31,70 +29,90 @@ export class LaunchesApi {
         app.post('/launches/updateRestaurantSurveyStatus', (req:Request, res:Response) => {
             try {
                 let statusesRef = AbstractServer.db.ref('statuses');
-                const newStatus = req.body.newStatus;
+                const newStatus:boolean = req.body.newStatus;
 
-                statusesRef.update({restaurantSurveyStatus: newStatus}).then(result => res.send(newStatus)).catch(error => res.status(500).send(`Error with saving new restaurant - ${error}`));
+                statusesRef.update({restaurantSurveyStatus: newStatus}).then(result => res.send(newStatus))
+                    .catch(error => res.status(500).send(`Error with saving new restaurant survey status - ${error}`));
             } catch (error) {
-                console.log(`Error with update restaurant survey- ${error}`);
-                res.status(500).send(`Error with saving new restaurant - ${error}`);
+                res.status(500).send(`Error with saving new restaurant survey status - ${error}`);
             }
         });
 
         app.get('/launches/getRestaurantSurveyStatus', (req:Request, res:Response) => {
             try {
                 let statusesRef = AbstractServer.db.ref('statuses');
-                statusesRef.on('value', (status) => {
-                    res.status(200).send(Object.values(status.val()).filter(curr => curr));
+                statusesRef.once('value').then(status => {
+                    const statuses:boolean[] = Object.values(status.val());
+                    res.status(200).send(statuses ? statuses[0] : false);
                 });
             } catch (error) {
-                console.log(`Error with getting restaurant survey - ${error}`);
                 res.status(500).send(`Error with getting all restaurants - ${error}`);
             }
         });
 
         app.post('/launches/updateRestaurantSurvey', (req:Request, res:Response) => {
             try {
-                let restaurantSurveyRef = AbstractServer.db.ref('restaurant-survey');
-                const newVote:{ id:number, voterId:string } = req.body;
+                let restaurantSurvey = AbstractServer.db.ref('restaurant-survey');
+                restaurantSurvey.once('value').then(dbSurvey => {
+                    const newVote:NewVote = req.body;
+                    const dbSurveyValues:RestaurantSurvey = dbSurvey.val();
+                    let updates:RestaurantSurvey = {};
+                    newVote.ids.forEach((restaurantId:number) => {
+                        updates[restaurantId] = this.getNewVote(restaurantId.toString(), newVote.voterId, dbSurveyValues);
+                    });
 
-                restaurantSurveyRef.on('value', (restaurantSurvey) => {
-                    let ans = restaurantSurvey.find(res => res.id === newVote.id);
-                    if (ans) {
-                        ans.voterId.push(newVote.voterId);
-                    } else {
-                        ans = newVote;
-                    }
-                    let surveyRef = AbstractServer.db.ref('restaurant-survey').push();
-                    surveyRef.set(ans).then(result => res.send(result)).catch(error => res.status(500).send(`Error with saving new restaurant - ${error}`));
+                    restaurantSurvey.update(updates).then(result => res.status(200).send(updates));
                 });
             } catch (error) {
-                console.log(`Error with updating restaurant survey - ${error}`);
-                res.status(500).send(`Error with saving new restaurant - ${error}`);
+                console.log(error);
+                res.status(500).send(`Error with saving new restaurant survey vote - ${error}`);
             }
         });
 
         app.get('/launches/getRestaurantSurvey', (req:Request, res:Response) => {
             try {
                 let restaurantSurveyRef = AbstractServer.db.ref('restaurant-survey');
-                restaurantSurveyRef.on('value', (restaurantSurvey) => {
-                    res.status(200).send(Object.values(restaurantSurvey.val()).filter(curr => curr));
+                restaurantSurveyRef.once('value').then(restaurantSurvey => {
+                    res.status(200).send(restaurantSurvey.val());
                 });
             } catch (error) {
-                console.log(`Error with getting restaurant survey - ${error}`);
-                res.status(500).send(`Error with getting all restaurants - ${error}`);
+                res.status(500).send(`Error with getting restaurants survey- ${error}`);
             }
         });
 
         app.get('/launches/getDiningRoomOfToday', (req:Request, res:Response) => {
             try {
                 let diningRoomRef = AbstractServer.db.ref('restaurant-survey/dining-room');
-                diningRoomRef.on('value', (diningRoom) => {-
-                    res.status(200).send(diningRoom);
+                diningRoomRef.on('value', (diningRoom) => {
+                    -
+                        res.status(200).send(diningRoom);
                 });
             } catch (error) {
-                console.log(`Error with getting dining room of today - ${error}`);
                 res.status(500).send(`Error with getting dining room of today - ${error}`);
             }
         });
     }
+
+    private static getNewVote(restaurantId:string, voterId:string, dbSurveyValues:RestaurantSurvey):string[] {
+        let newVoters:string[] = [voterId];
+        if (dbSurveyValues[restaurantId]) {
+            const DbVoters:string[] = dbSurveyValues[restaurantId];
+            if (!DbVoters.find(dbVoter => dbVoter === voterId)) {
+                newVoters = [...DbVoters, ...newVoters];
+            } else {
+                newVoters = DbVoters;
+            }
+        }
+
+        return newVoters;
+    }
+}
+
+interface NewVote {
+    ids:number[];
+    voterId:string;
+}
+
+interface RestaurantSurvey {
+    [id:string]:string[];
 }
