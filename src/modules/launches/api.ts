@@ -63,7 +63,7 @@ export class LaunchesApi {
                     });
 
                     restaurantSurvey.update(updates)
-                        .then(result => res.status(200).send(req.body));
+                        .then(result => res.status(200).send(updates));
 
                 });
             } catch (error) {
