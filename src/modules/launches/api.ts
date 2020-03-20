@@ -56,17 +56,18 @@ export class LaunchesApi {
 
                 restaurantSurvey.once('value').then(dbSurvey => {
                     const newVote:{ ids:number[], voterId:string } = req.body;
-                    const dbSurveyValues:RestaurantVote[] = Object.values(dbSurvey.val());
-                    let updates = {};
+                    const dbSurveyValues:Object = dbSurvey.val();
+                    let updates:Object = {};
                     newVote.ids.forEach((restaurantId:number) => {
                         updates[restaurantId] = this.getNewVote(restaurantId.toString(), newVote.voterId, dbSurveyValues);
                     });
+
                     restaurantSurvey.update(updates)
-                        .then(res => res.status(200).send(req.body))
-                        .catch(error => res.status(500).send(`Error with saving new restaurant survey vote - ${error}`));
+                        .then(result => res.status(200).send(req.body));
 
                 });
             } catch (error) {
+                console.log(error);
                 res.status(500).send(`Error with saving new restaurant survey vote - ${error}`);
             }
         });
@@ -75,7 +76,7 @@ export class LaunchesApi {
             try {
                 let restaurantSurveyRef = AbstractServer.db.ref('restaurant-survey');
                 restaurantSurveyRef.on('value', (restaurantSurvey) => {
-                    res.status(200).send(Object.values(restaurantSurvey.val()).filter(curr => curr));
+                    res.status(200).send(restaurantSurvey.val());
                 });
             } catch (error) {
                 res.status(500).send(`Error with getting all restaurants - ${error}`);
@@ -95,11 +96,10 @@ export class LaunchesApi {
         });
     }
 
-    private static getNewVote(restaurantId:string, voterId:string, dbSurveyValues:RestaurantVote[]):RestaurantVote {
+    private static getNewVote(restaurantId:string, voterId:string, dbSurveyValues:Object):string[] {
         let newVoters:string[] = [voterId];
-        let dbIndex:number = dbSurveyValues.findIndex(res => res.restaurantId === restaurantId);
-        if (dbIndex !== -1) {
-            const DbVoters:string[] = dbSurveyValues[dbIndex].votersIds;
+        if (dbSurveyValues[restaurantId]) {
+            const DbVoters:string[] = dbSurveyValues[restaurantId];
             if (!DbVoters.find(dbVoter => dbVoter === voterId)) {
                 newVoters = [...DbVoters, ...newVoters];
             } else {
@@ -107,14 +107,6 @@ export class LaunchesApi {
             }
         }
 
-        return {
-            restaurantId: restaurantId,
-            votersIds: newVoters
-        };
+        return newVoters;
     }
-}
-
-interface RestaurantVote {
-    restaurantId:string;
-    votersIds:string[];
 }
