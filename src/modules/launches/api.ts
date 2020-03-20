@@ -53,33 +53,24 @@ export class LaunchesApi {
         app.post('/launches/updateRestaurantSurvey', (req:Request, res:Response) => {
             try {
                 let restaurantSurveyGet = AbstractServer.db.ref('restaurant-survey');
-                let restaurantSurveySet = AbstractServer.db.ref('restaurant-survey').push();
+                let restaurantSurveySet = AbstractServer.db.ref('restaurant-survey');
 
-                restaurantSurveyGet.on('value', (survey) => {
+                restaurantSurveyGet.once('value').then(dbSurvey => {
                     const newVote:{ ids:number[], voterId:string } = req.body;
-                    const surveyDbValue = survey.val();
-                    const dbRestaurant:string[] = Object.keys(surveyDbValue);
-
-                    console.log(Object.values(surveyDbValue));
-                    console.log(Object.keys(surveyDbValue));
-
+                    const dbSurveyValues:RestaurantVote[] = Object.values(dbSurvey.val());
+                    let updates = {};
                     newVote.ids.forEach((restaurantId:number) => {
-                        if (dbRestaurant.find(res => res === restaurantId.toString())) {
-                            //update existed val
-                            const DbVoters:string[] = surveyDbValue[surveyDbValue];
-                            const newVoters:string[] = [...DbVoters, newVote.voterId];
-                            restaurantSurveyGet.update({restaurantId: newVoters});
+                        const newDbVote:RestaurantVote = this.getNewVote(restaurantId.toString(), newVote.voterId, dbSurveyValues);
 
-                        } else {
-                            // insert new val
-                            restaurantSurveySet.set({restaurantId: [newVote.voterId]});
-                        }
+
+                        let x = Object.keys(dbSurvey.val())[0];
+                        restaurantSurveySet.update({'-M2B9NVJ6RxmLCI3pTbX':newDbVote})
+                            .then(res => res.status(200).send(req.body))
+                            .catch(error => res.status(500).send(`Error with saving new restaurant survey vote - ${error}`));
                     });
                 });
-
-                res.status(200).send(req.body);
             } catch (error) {
-                res.status(500).send(`Error with saving new restaurant - ${error}`);
+                res.status(500).send(`Error with saving new restaurant survey vote - ${error}`);
             }
         });
 
@@ -106,4 +97,27 @@ export class LaunchesApi {
             }
         });
     }
+
+    private static getNewVote(restaurantId:string, voterId:string, dbSurveyValues:RestaurantVote[]):RestaurantVote {
+        let newVoters:string[] = [voterId];
+        let dbIndex:number = dbSurveyValues.findIndex(res => res.restaurantId === restaurantId);
+        if (dbIndex !== -1) {
+            const DbVoters:string[] = dbSurveyValues[dbIndex].votersIds;
+            if (!DbVoters.find(dbVoter => dbVoter === voterId)) {
+                newVoters = [...DbVoters, ...newVoters];
+            } else {
+                newVoters = DbVoters;
+            }
+        }
+
+        return {
+            restaurantId: restaurantId,
+            votersIds: newVoters
+        };
+    }
+}
+
+interface RestaurantVote {
+    restaurantId:string;
+    votersIds:string[];
 }
