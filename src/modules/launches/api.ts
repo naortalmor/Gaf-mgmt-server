@@ -52,22 +52,19 @@ export class LaunchesApi {
 
         app.post('/launches/updateRestaurantSurvey', (req:Request, res:Response) => {
             try {
-                let restaurantSurveyGet = AbstractServer.db.ref('restaurant-survey');
-                let restaurantSurveySet = AbstractServer.db.ref('restaurant-survey');
+                let restaurantSurvey = AbstractServer.db.ref('restaurant-survey');
 
-                restaurantSurveyGet.once('value').then(dbSurvey => {
+                restaurantSurvey.once('value').then(dbSurvey => {
                     const newVote:{ ids:number[], voterId:string } = req.body;
                     const dbSurveyValues:RestaurantVote[] = Object.values(dbSurvey.val());
                     let updates = {};
                     newVote.ids.forEach((restaurantId:number) => {
-                        const newDbVote:RestaurantVote = this.getNewVote(restaurantId.toString(), newVote.voterId, dbSurveyValues);
-
-
-                        let x = Object.keys(dbSurvey.val())[0];
-                        restaurantSurveySet.update({'-M2B9NVJ6RxmLCI3pTbX':newDbVote})
-                            .then(res => res.status(200).send(req.body))
-                            .catch(error => res.status(500).send(`Error with saving new restaurant survey vote - ${error}`));
+                        updates[restaurantId] = this.getNewVote(restaurantId.toString(), newVote.voterId, dbSurveyValues);
                     });
+                    restaurantSurvey.update(updates)
+                        .then(res => res.status(200).send(req.body))
+                        .catch(error => res.status(500).send(`Error with saving new restaurant survey vote - ${error}`));
+
                 });
             } catch (error) {
                 res.status(500).send(`Error with saving new restaurant survey vote - ${error}`);
